@@ -1,0 +1,24 @@
+├─src
+|  ├─single-spa.js                  # 入口
+|  ├─start.js                       # start方法
+|  ├─utils                          # 工具
+|  |   ├─assign.js
+|  |   ├─find.js
+|  |   └runtime-environment.js
+|  ├─navigation                      # 导航相关
+|  |     ├─navigation-events.js      # 导航事件
+|  |     └reroute.js                 # 核心方法，重新路由函数
+|  ├─lifecycles                      # 生命周期
+|  |     ├─bootstrap.js
+|  |     ├─lifecycle.helpers.js
+|  |     ├─load.js
+|  |     ├─mount.js
+|  |     ├─prop.helpers.js
+|  |     ├─unload.js
+|  |     ├─unmount.js
+|  |     └update.js
+|  ├─applications                     # 应用程序相关
+|  |      ├─app-errors.js
+|  |      ├─app.helpers.js            # 状态管理
+|  |      ├─apps.js                   # 注册应用等
+|  |      └timeouts.js
