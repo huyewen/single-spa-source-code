@@ -90,6 +90,12 @@ function patchedUpdateState (updateState, methodName) {
     if (!urlRerouteOnly || urlBefore !== urlAfter) {
       // 1. single-spa启动，人工触发popstate事件。目的是为了让single-spa知道不同应用间的路由信息
       if (isStarted()) {
+        /**
+         * history.state: 属性返回表示历史堆栈顶部状态的值。这是一种无需等待popstate事件就可以查看状态的方法,
+         * 例如：
+         * history.pushState({name: 'yivn', age: '12312'}, 'yivn', '/yivn')
+         * history.state // {name: 'yivn', age: '12312'}
+         */
         window.dispatchEvent(createPopStateEvent(window.history.state, methodName));
         // 2. 在single-spa启动前，不要触发popstate事件。因为各自应用只关心自己的路由，没必要了解其他应用的路由
       } else {
@@ -102,11 +108,31 @@ function patchedUpdateState (updateState, methodName) {
 }
 
 // 创建popstate自定义事件
-// 当调用pushState，replaceState时，浏览器没有做任何操作，但是我们需要一个popstate事件，以便所有的应用都可以reroute。
+// 当调用pushState，replaceState时，浏览器没有做任何操作，但是我们需要一个popstate事件，以便所有的应用都可以reroute。\
+
+// 其实就是传给popstate事件的一个事件对象，
 function createPopStateEvent (state, originalMethodName) {
   let evt;
   try {
     evt = new PopStateEvent("popstate", { state });
+    /**
+     * popstateEvent {
+     * isTrusted: false
+     * bubbles: false
+     * cancelBubble: false
+     * cancelable: false
+     * composed: false
+     * currentTarget: null
+     * defaultPrevented: false
+     * eventPhase: 0
+     * path: []
+     * returnValue: true
+     * srcElement: null
+     * state: {...state} // 传入的state
+     * target: null
+     * timeStamp: 546028.200000003
+     * type: "popstate"}
+     */
   } catch (err) {
     evt = document.createEvent("PopStateEvent");
     evt.initPopStateEvent("popstate", false, false, state);
