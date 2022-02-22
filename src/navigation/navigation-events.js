@@ -14,7 +14,7 @@ const capturedEventListeners = {
 export const routingEventsListeningTo = ["hashchange", "popstate"];
 
 // 导航到某个url
-export function navigateToUrl(obj) {
+export function navigateToUrl (obj) {
   let url;
   if (typeof obj === "string") {
     url = obj;
@@ -38,20 +38,20 @@ export function navigateToUrl(obj) {
   // 1.hash路由
   if (url.indexOf("#") === 0) {
     window.location.hash = destination.hash;
-  // 2.域名不一致，以用户输入地址为准
+    // 2.域名不一致，以用户输入地址为准
   } else if (current.host !== destination.host && destination.host) {
     window.location.href = url;
-  // 3.域名一致，并且pathname和search一致
-  } else if ( destination.pathname === current.pathname && destination.search === current.search ) {
+    // 3.域名一致，并且pathname和search一致
+  } else if (destination.pathname === current.pathname && destination.search === current.search) {
     window.location.hash = destination.hash;
-  // 4.不同的域名、pathname、参数
+    // 4.不同的域名、pathname、参数
   } else {
     window.history.pushState(null, null, url);
   }
 }
 
 // 依次调用保存好的事件函数
-export function callCapturedEventListeners(eventArguments) {
+export function callCapturedEventListeners (eventArguments) {
   if (eventArguments) {
     const eventType = eventArguments[0].type;
     // 仅针对 popstate，hashchange事件类型
@@ -72,16 +72,16 @@ export function callCapturedEventListeners(eventArguments) {
 
 // 是否在客户端更改路由后触发single-spa重新路由。默认为false，设置为true时不会重新路由
 let urlRerouteOnly;
-export function setUrlRerouteOnly(val) {
+export function setUrlRerouteOnly (val) {
   urlRerouteOnly = val;
 }
 
 // url路由变化，触发single-spa重新路由
-function urlReroute() {
+function urlReroute () {
   reroute([], arguments);
 }
 
-function patchedUpdateState(updateState, methodName) {
+function patchedUpdateState (updateState, methodName) {
   return function () {
     const urlBefore = window.location.href;
     const result = updateState.apply(this, arguments); // 调用原方法 history.pushState, history.replaceState
@@ -90,8 +90,8 @@ function patchedUpdateState(updateState, methodName) {
     if (!urlRerouteOnly || urlBefore !== urlAfter) {
       // 1. single-spa启动，人工触发popstate事件。目的是为了让single-spa知道不同应用间的路由信息
       if (isStarted()) {
-        window.dispatchEvent( createPopStateEvent(window.history.state, methodName) );
-      // 2. 在single-spa启动前，不要触发popstate事件。因为各自应用只关心自己的路由，没必要了解其他应用的路由
+        window.dispatchEvent(createPopStateEvent(window.history.state, methodName));
+        // 2. 在single-spa启动前，不要触发popstate事件。因为各自应用只关心自己的路由，没必要了解其他应用的路由
       } else {
         reroute([]);
       }
@@ -103,7 +103,7 @@ function patchedUpdateState(updateState, methodName) {
 
 // 创建popstate自定义事件
 // 当调用pushState，replaceState时，浏览器没有做任何操作，但是我们需要一个popstate事件，以便所有的应用都可以reroute。
-function createPopStateEvent(state, originalMethodName) {
+function createPopStateEvent (state, originalMethodName) {
   let evt;
   try {
     evt = new PopStateEvent("popstate", { state });
@@ -126,7 +126,7 @@ if (isInBrowser) {
   const originalRemoveEventListener = window.removeEventListener;
   window.addEventListener = function (eventName, fn) {
     // 只保存hashchange和popstate的路由切换函数，并且进行去重
-    if ( routingEventsListeningTo.indexOf(eventName) >= 0 && !find(capturedEventListeners[eventName], (listener) => listener === fn) ) {
+    if (routingEventsListeningTo.indexOf(eventName) >= 0 && !find(capturedEventListeners[eventName], (listener) => listener === fn)) {
       capturedEventListeners[eventName].push(fn);
 
       return;
@@ -163,7 +163,7 @@ if (isInBrowser) {
 }
 
 // 创建a标签，并赋值href
-function parseUri(str) {
+function parseUri (str) {
   const anchor = document.createElement("a");
   anchor.href = str;
   return anchor;

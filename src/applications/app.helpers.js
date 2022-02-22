@@ -15,11 +15,11 @@ export const LOAD_ERROR = "LOAD_ERROR"; // 加载错误
 export const SKIP_BECAUSE_BROKEN = "SKIP_BECAUSE_BROKEN"; // 跳过，因为挂了，用于报错时的状态
 
 // 当前应用处于激活状态
-export function isActive(app) {
+export function isActive (app) {
   return app.status === MOUNTED;
 }
 // 当前应用是否应该被激活
-export function shouldBeActive(app) {
+export function shouldBeActive (app) {
   try {
     return app.activeWhen(window.location); // 执行函数，得到一个字符串，用来标识应用前缀
   } catch (err) {
@@ -27,15 +27,15 @@ export function shouldBeActive(app) {
     return false;
   }
 }
-
-export function toName(app) {
+// 获取应用名称
+export function toName (app) {
   return app.name;
 }
 
-export function isParcel(appOrParcel) {
+export function isParcel (appOrParcel) {
   return Boolean(appOrParcel.unmountThisParcel);
 }
 
-export function objectType(appOrParcel) {
+export function objectType (appOrParcel) {
   return isParcel(appOrParcel) ? "parcel" : "application";
 }

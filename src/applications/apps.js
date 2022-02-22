@@ -29,8 +29,8 @@ import { assign } from "../utils/assign";
 const apps = [];
 
 // 获取不同状态下的应用集合
-export function getAppChanges() {
-  const appsToUnload = [],
+export function getAppChanges () {
+  const appsToUnload = [], // 带完全卸载应用
     appsToUnmount = [], // 待卸载应用
     appsToLoad = [], // 待加载应用
     appsToMount = []; // 待挂载应用
@@ -40,6 +40,9 @@ export function getAppChanges() {
 
   apps.forEach((app) => {
     // 获取激活应用的前缀
+    /**
+     * shouldBeActive()返回该应用是否处于激活状态的Boolean值
+     */
     const appShouldBeActive =
       app.status !== SKIP_BECAUSE_BROKEN && shouldBeActive(app);
 
@@ -52,16 +55,16 @@ export function getAppChanges() {
         }
         break;
       // 正在加载
-      case NOT_LOADED:
-      case LOADING_SOURCE_CODE:
+      case NOT_LOADED: // 未加载
+      case LOADING_SOURCE_CODE: // 正在加载中
         if (appShouldBeActive) {
           appsToLoad.push(app);
         }
         break;
       // 加载完成，待挂载
-      case NOT_BOOTSTRAPPED:
-      case NOT_MOUNTED:
-        if (!appShouldBeActive && getAppUnloadInfo(toName(app))) {
+      case NOT_BOOTSTRAPPED: // 未激活启动
+      case NOT_MOUNTED: // 未挂载
+        if (!appShouldBeActive && getAppUnloadInfo(toName(app))) { // 有未完全卸载的
           appsToUnload.push(app); // 待卸载
         } else if (appShouldBeActive) {
           appsToMount.push(app); // 待挂载
@@ -79,26 +82,26 @@ export function getAppChanges() {
   return { appsToUnload, appsToUnmount, appsToLoad, appsToMount };
 }
 // 获取已经挂载的应用，即状态为 MOUNTED 的应用
-export function getMountedApps() {
+export function getMountedApps () {
   return apps.filter(isActive).map(toName);
 }
 // 获取app名称集合
-export function getAppNames() {
+export function getAppNames () {
   return apps.map(toName);
 }
 
 // 原有应用配置数据 devtools中使用
-export function getRawAppData() {
+export function getRawAppData () {
   return [...apps];
 }
 // 获取应用状态，指：NOT_LOADED, NOT_MOUNTED, MOUNTED, ...
-export function getAppStatus(appName) {
+export function getAppStatus (appName) {
   const app = find(apps, (app) => toName(app) === appName);
   return app ? app.status : null;
 }
 
 // 注册应用
-export function registerApplication(
+export function registerApplication (
   appNameOrConfig, // 应用的名字
   appOrLoadApp, // promise函数，也可以是一个被解析过的应用
   activeWhen, // 应用标识 激活标识
@@ -130,17 +133,17 @@ export function registerApplication(
     )
   );
 
-  if (isInBrowser) {
+  if (isInBrowser) { // 在浏览器环境跑（window不为undefined）
     ensureJQuerySupport();
     reroute();
   }
 }
 // 获取当前激活函数：遍历所有应用，通过匹配应用标识符，得到应用的name
-export function checkActivityFunctions(location = window.location) {
+export function checkActivityFunctions (location = window.location) {
   return apps.filter((app) => app.activeWhen(location)).map(toName);
 }
 // 取消注册应用
-export function unregisterApplication(appName) {
+export function unregisterApplication (appName) {
   // 应用本来就没有被注册过，无法取消注册
   if (apps.filter((app) => toName(app) === appName).length === 0) {
     throw Error("此应该本来就未被注册过，因此无法取消注册");
@@ -152,7 +155,7 @@ export function unregisterApplication(appName) {
   });
 }
 // 卸载应用
-export function unloadApplication(appName, opts = { waitForUnmount: false }) {
+export function unloadApplication (appName, opts = { waitForUnmount: false }) {
   // app名称必须为字符串
   if (typeof appName !== "string") {
     throw Error("应用名称必须为字符串！");
@@ -196,7 +199,7 @@ export function unloadApplication(appName, opts = { waitForUnmount: false }) {
   }
 }
 // 立即卸载应用程序
-function immediatelyUnloadApp(app, resolve, reject) {
+function immediatelyUnloadApp (app, resolve, reject) {
   toUnmountPromise(app) // 先unmount
     .then(toUnloadPromise) // 再unload
     .then(() => {
@@ -210,7 +213,7 @@ function immediatelyUnloadApp(app, resolve, reject) {
 }
 
 // 校验应用配置，必填校验
-function validateRegisterWithArguments(
+function validateRegisterWithArguments (
   name,
   appOrLoadApp,
   activeWhen,
@@ -231,7 +234,7 @@ function validateRegisterWithArguments(
 }
 
 // 校验应用配置，用户传入配置的合法性
-export function validateRegisterWithConfig(config) {
+export function validateRegisterWithConfig (config) {
   // 1. 应用配置不能是数组或者null
   if (Array.isArray(config) || config === null)
     throw Error("应用名称不能是数组或者null");
@@ -268,7 +271,7 @@ export function validateRegisterWithConfig(config) {
   if (!validCustomProps(config.customProps))
     throw Error("customProps 必须是对象，不能是函数或者数组，也不能为空");
 }
-function validCustomProps(customProps) {
+function validCustomProps (customProps) {
   return (
     !customProps ||
     typeof customProps === "function" ||
@@ -281,7 +284,7 @@ function validCustomProps(customProps) {
 // 消毒，配置校验，合法后生成目标配置对象
 // 配置校验分为：整个配置的合法性校验和非空校验
 // 合法配置
-function sanitizeArguments(
+function sanitizeArguments (
   appNameOrConfig,
   appOrLoadApp,
   activeWhen,
@@ -324,7 +327,7 @@ function sanitizeArguments(
   return registration;
 }
 // loadApp 包装成promise （如果是函数，则必须提供返回promise的函数）
-function sanitizeLoadApp(loadApp) {
+function sanitizeLoadApp (loadApp) {
   if (typeof loadApp !== "function") {
     return () => Promise.resolve(loadApp);
   }
@@ -332,11 +335,11 @@ function sanitizeLoadApp(loadApp) {
   return loadApp;
 }
 // cusromProps 如果是空，则给个空对象
-function sanitizeCustomProps(customProps) {
+function sanitizeCustomProps (customProps) {
   return customProps ? customProps : {};
 }
 // activeWhen 返回一个函数，将location传入 (location) => location.hash.startsWith('#/app1'); 调用后返回一个字符串
-function sanitizeActiveWhen(activeWhen) {
+function sanitizeActiveWhen (activeWhen) {
   let activeWhenArray = Array.isArray(activeWhen) ? activeWhen : [activeWhen]; // 
   activeWhenArray = activeWhenArray.map((activeWhenOrPath) =>
     typeof activeWhenOrPath === "function"
@@ -351,7 +354,7 @@ function sanitizeActiveWhen(activeWhen) {
 // activeWhen传入的不是函数，而是字符串或者数组，则特殊处理
 // '/app1', '/users/:userId/profile', '/pathname/#/hash' ['/pathname/#/hash', '/app1']
 // 具体见官方文档api，有详细说明：https://zh-hans.single-spa.js.org/docs/api
-export function pathToActiveWhen(path, exactMatch) {
+export function pathToActiveWhen (path, exactMatch) {
   const regex = toDynamicPathValidatorRegex(path, exactMatch); // 返回符合激活条件的正则
 
   return (location) => {
@@ -363,7 +366,7 @@ export function pathToActiveWhen(path, exactMatch) {
   };
 }
 
-function toDynamicPathValidatorRegex(path, exactMatch) { // '/myApp'
+function toDynamicPathValidatorRegex (path, exactMatch) { // '/myApp'
   let lastIndex = 0,
     inDynamic = false,
     regexStr = "^";
@@ -384,7 +387,7 @@ function toDynamicPathValidatorRegex(path, exactMatch) { // '/myApp'
   appendToRegex(path.length);
   return new RegExp(regexStr, "i");
 
-  function appendToRegex(index) {
+  function appendToRegex (index) {
     const anyCharMaybeTrailingSlashRegex = "[^/]+/?";
     const commonStringSubPath = escapeStrRegex(path.slice(lastIndex, index));
 
@@ -416,7 +419,7 @@ function toDynamicPathValidatorRegex(path, exactMatch) { // '/myApp'
     lastIndex = index;
   }
 
-  function escapeStrRegex(str) {
+  function escapeStrRegex (str) {
     // borrowed from https://github.com/sindresorhus/escape-string-regexp/blob/master/index.js
     return str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
   }

@@ -8,19 +8,19 @@ let started = false;
 
 // 在调用start之前，应用被加载了，但是不会初始化，不会挂载或者卸载。
 // 调用这个函数，就意味着要开始挂载，就会开始激活应用里的代码
-export function start(opts) {
+export function start (opts) {
   started = true;
   // 是否不希望浏览器路由变化后，single-spa重新路由
   if (opts && opts.urlRerouteOnly) {
     setUrlRerouteOnly(opts.urlRerouteOnly);
   }
-  // 仅支持在浏览器环境跑
+  // 仅支持在浏览器环境跑（window不为undefined）
   if (isInBrowser) {
     reroute();
   }
 }
 // 是否已经启动
-export function isStarted() {
+export function isStarted () {
   return started;
 }
 
