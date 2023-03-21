@@ -49,8 +49,8 @@ export function reroute (pendingPromises = [], eventArguments) {
   const { appsToUnload, appsToUnmount, appsToLoad, appsToMount } = getAppChanges();
   let appsThatChanged,
     navigationIsCanceled = false, // 是否取消导航
-    oldUrl = currentUrl,
-    newUrl = (currentUrl = window.location.href);
+    oldUrl = currentUrl, // 路由在跳转，上次保存的路径成为老路径
+    newUrl = (currentUrl = window.location.href); // 当前页面路径才是新路径
   // 已经调用了start方法
   if (isStarted()) {
     appChangeUnderway = true;

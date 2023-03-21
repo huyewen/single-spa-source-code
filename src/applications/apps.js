@@ -30,7 +30,7 @@ const apps = [];
 
 // 获取不同状态下的应用集合
 export function getAppChanges () {
-  const appsToUnload = [], // 带完全卸载应用
+  const appsToUnload = [], // 待完全卸载应用
     appsToUnmount = [], // 待卸载应用
     appsToLoad = [], // 待加载应用
     appsToMount = []; // 待挂载应用
@@ -117,7 +117,7 @@ export function registerApplication (
   if (getAppNames().indexOf(registration.name) !== -1) throw Error("应用已经注册过了！");
   // 注册应用，放到apps中
   apps.push(
-    assign(
+    assign( // 合并注册选项
       {
         loadErrorTime: null, // 加载错误时间
         status: NOT_LOADED, // 默认状态，未加载
@@ -304,9 +304,9 @@ function sanitizeArguments (
   if (usingObjectAPI) { // 如果appNameOrConfig是一个对象，则从对象中拿出对应的属性放置到registration中
     validateRegisterWithConfig(appNameOrConfig);
     registration.name = appNameOrConfig.name;
-    registration.loadApp = appNameOrConfig.app;
-    registration.activeWhen = appNameOrConfig.activeWhen;
-    registration.customProps = appNameOrConfig.customProps;
+    registration.loadApp = appNameOrConfig.app; // 要不就是返回promise的函数，要不就是一个对象，这个对象表示已经被解析过的应用，它包含各个生命周期函数
+    registration.activeWhen = appNameOrConfig.activeWhen; // 可以是路径字符串，路劲字符串数组，也可以是参数为location的函数
+    registration.customProps = appNameOrConfig.customProps; // 自定义参数
   } else {
     validateRegisterWithArguments(
       appNameOrConfig,
@@ -320,8 +320,8 @@ function sanitizeArguments (
     registration.customProps = customProps;
   }
 
-  registration.loadApp = sanitizeLoadApp(registration.loadApp);
-  registration.customProps = sanitizeCustomProps(registration.customProps);
+  registration.loadApp = sanitizeLoadApp(registration.loadApp); // 如果loadApp不是promise实例，则包装成promise实例
+  registration.customProps = sanitizeCustomProps(registration.customProps); // 如果没有自定义参数，则给个空对象{}
   registration.activeWhen = sanitizeActiveWhen(registration.activeWhen); // 转换唯一个函数，入参是location，只有传入
 
   return registration;

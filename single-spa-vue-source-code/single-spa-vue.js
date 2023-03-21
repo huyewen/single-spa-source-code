@@ -30,7 +30,7 @@
     return keys; // 可枚举的一般属性和可枚举的symbol属性
   }
 
-  function _objectSpread (target) {
+  function _objectSpread (target) { // 刚来的时候target是个{}对象
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i] != null ? arguments[i] : {};
       if (i % 2) { // i 为奇数

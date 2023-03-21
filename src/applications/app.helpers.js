@@ -2,7 +2,7 @@ import { handleAppError } from "./app-errors.js";
 
 // App 状态 === single-spa的所有状态都在这里
 export const NOT_LOADED = "NOT_LOADED"; // 未加载
-export const LOADING_SOURCE_CODE = "LOADING_SOURCE_CODE"; // 加载中
+export const LOADING_SOURCE_CODE = "LOADING_SOURCE_CODE"; // 正在加载源码
 export const NOT_BOOTSTRAPPED = "NOT_BOOTSTRAPPED"; // 未激活启动
 export const BOOTSTRAPPING = "BOOTSTRAPPING"; // 激活启动中
 export const NOT_MOUNTED = "NOT_MOUNTED"; // 未挂载
@@ -14,7 +14,7 @@ export const UNLOADING = "UNLOADING"; // 完全卸载
 export const LOAD_ERROR = "LOAD_ERROR"; // 加载错误
 export const SKIP_BECAUSE_BROKEN = "SKIP_BECAUSE_BROKEN"; // 跳过，因为挂了，用于报错时的状态
 
-// 当前应用处于激活状态
+// 当前应用处于激活状态，也就是挂载状态
 export function isActive (app) {
   return app.status === MOUNTED;
 }

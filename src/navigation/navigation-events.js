@@ -41,7 +41,7 @@ export function navigateToUrl (obj) {
     // 2.域名不一致，以用户输入地址为准
   } else if (current.host !== destination.host && destination.host) {
     window.location.href = url;
-    // 3.域名一致，并且pathname和search一致
+    // 3.域名一致，并且pathname和search一致,修改hash值
   } else if (destination.pathname === current.pathname && destination.search === current.search) {
     window.location.hash = destination.hash;
     // 4.不同的域名、pathname、参数
@@ -83,12 +83,16 @@ function urlReroute () {
 
 function patchedUpdateState (updateState, methodName) {
   return function () {
+    // 记录切换前的url
     const urlBefore = window.location.href;
-    const result = updateState.apply(this, arguments); // 调用原方法 history.pushState, history.replaceState
+    // 调用原生方法 history.pushState, history.replaceState，获得返回结果
+    const result = updateState.apply(this, arguments);
+    // 记录切换后的url
     const urlAfter = window.location.href;
     // 切换浏览器地址要single-spa重新路由，并且切的不是同一个浏览器地址时
     if (!urlRerouteOnly || urlBefore !== urlAfter) {
       // 1. single-spa启动，人工触发popstate事件。目的是为了让single-spa知道不同应用间的路由信息
+      // 因为原生调用history.pushState, history.replaceState的时候是不会出发popstate事件的，只有路由前进后退才触发，所以这里手动触发
       if (isStarted()) {
         /**
          * history.state: 属性返回表示历史堆栈顶部状态的值。这是一种无需等待popstate事件就可以查看状态的方法,
@@ -150,6 +154,7 @@ if (isInBrowser) {
   // 保存事件监听函数
   const originalAddEventListener = window.addEventListener;
   const originalRemoveEventListener = window.removeEventListener;
+  // 重写事件监听函数，让事件监听的同时能够对事件进行一个拦截缓存
   window.addEventListener = function (eventName, fn) {
     // 只保存hashchange和popstate的路由切换函数，并且进行去重
     if (routingEventsListeningTo.indexOf(eventName) >= 0 && !find(capturedEventListeners[eventName], (listener) => listener === fn)) {
@@ -157,12 +162,14 @@ if (isInBrowser) {
 
       return;
     }
-
+    // 如果不是hashchange和popstate，则不受拦截
     return originalAddEventListener.apply(this, arguments);
   };
   // 移除事件监听函数
   window.removeEventListener = function (eventName, listenerFn) {
+    // 如果是hashchange和popstate
     if (routingEventsListeningTo.indexOf(eventName) >= 0) {
+      // 将listenerFn从capturedEventListeners[eventName]中去除
       capturedEventListeners[eventName] = capturedEventListeners[eventName].filter((fn) => fn !== listenerFn);
       return;
     }
@@ -170,7 +177,7 @@ if (isInBrowser) {
     return originalRemoveEventListener.apply(this, arguments);
   };
 
-  // 浏览器api进行处理
+  // 重写pushState和replaceState
   window.history.pushState = patchedUpdateState(
     window.history.pushState,
     "pushState"
