@@ -32,14 +32,14 @@ const globalTimeoutConfig = {
     warningMillis: defaultWarningMillis,
   },
 };
-
-export function setBootstrapMaxTime(time, dieOnTimeout, warningMillis) {
+// 设置启动时间配置
+export function setBootstrapMaxTime (time, dieOnTimeout, warningMillis) {
   if (typeof time !== "number" || time <= 0) {
     throw Error(
       formatErrorMessage(
         16,
         __DEV__ &&
-          `bootstrap max time must be a positive integer number of milliseconds`
+        `bootstrap max time must be a positive integer number of milliseconds`
       )
     );
   }
@@ -51,13 +51,13 @@ export function setBootstrapMaxTime(time, dieOnTimeout, warningMillis) {
   };
 }
 
-export function setMountMaxTime(time, dieOnTimeout, warningMillis) {
+export function setMountMaxTime (time, dieOnTimeout, warningMillis) {
   if (typeof time !== "number" || time <= 0) {
     throw Error(
       formatErrorMessage(
         17,
         __DEV__ &&
-          `mount max time must be a positive integer number of milliseconds`
+        `mount max time must be a positive integer number of milliseconds`
       )
     );
   }
@@ -69,13 +69,13 @@ export function setMountMaxTime(time, dieOnTimeout, warningMillis) {
   };
 }
 
-export function setUnmountMaxTime(time, dieOnTimeout, warningMillis) {
+export function setUnmountMaxTime (time, dieOnTimeout, warningMillis) {
   if (typeof time !== "number" || time <= 0) {
     throw Error(
       formatErrorMessage(
         18,
         __DEV__ &&
-          `unmount max time must be a positive integer number of milliseconds`
+        `unmount max time must be a positive integer number of milliseconds`
       )
     );
   }
@@ -87,13 +87,13 @@ export function setUnmountMaxTime(time, dieOnTimeout, warningMillis) {
   };
 }
 
-export function setUnloadMaxTime(time, dieOnTimeout, warningMillis) {
+export function setUnloadMaxTime (time, dieOnTimeout, warningMillis) {
   if (typeof time !== "number" || time <= 0) {
     throw Error(
       formatErrorMessage(
         19,
         __DEV__ &&
-          `unload max time must be a positive integer number of milliseconds`
+        `unload max time must be a positive integer number of milliseconds`
       )
     );
   }
@@ -105,7 +105,7 @@ export function setUnloadMaxTime(time, dieOnTimeout, warningMillis) {
   };
 }
 
-export function reasonableTime(appOrParcel, lifecycle) { // app, 'unload'
+export function reasonableTime (appOrParcel, lifecycle) { // app, 'unload'
   const timeoutConfig = appOrParcel.timeouts[lifecycle];
   const warningPeriod = timeoutConfig.warningMillis;
   const type = objectType(appOrParcel); // parcel、 application
@@ -126,24 +126,25 @@ export function reasonableTime(appOrParcel, lifecycle) { // app, 'unload'
         reject(val);
       });
 
+    // 超时检测
     setTimeout(() => maybeTimingOut(1), warningPeriod);
     setTimeout(() => maybeTimingOut(true), timeoutConfig.millis);
 
     const errMsg = formatErrorMessage(
       31,
       __DEV__ &&
-        `Lifecycle function ${lifecycle} for ${type} ${toName(
-          appOrParcel
-        )} lifecycle did not resolve or reject for ${timeoutConfig.millis} ms.`,
+      `Lifecycle function ${lifecycle} for ${type} ${toName(
+        appOrParcel
+      )} lifecycle did not resolve or reject for ${timeoutConfig.millis} ms.`,
       lifecycle,
       type,
       toName(appOrParcel),
       timeoutConfig.millis
     );
 
-    function maybeTimingOut(shouldError) {
-      if (!finished) {
-        if (shouldError === true) {
+    function maybeTimingOut (shouldError) {
+      if (!finished) { // 卸载操作还没结束，可能成功可能失败，在这里表示超时了
+        if (shouldError === true) { // 规定超时时间还没搞定，真的有问题了
           errored = true;
           if (timeoutConfig.dieOnTimeout) {
             reject(Error(errMsg));
@@ -151,10 +152,11 @@ export function reasonableTime(appOrParcel, lifecycle) { // app, 'unload'
             console.error(errMsg);
             //don't resolve or reject, we're waiting this one out
           }
-        } else if (!errored) {
-          const numWarnings = shouldError;
-          const numMillis = numWarnings * warningPeriod;
+        } else if (!errored) { // 还有救，再等等
+          const numWarnings = shouldError; // 1
+          const numMillis = numWarnings * warningPeriod; // 1000
           console.warn(errMsg);
+          // 只要还小于超时时间
           if (numMillis + warningPeriod < timeoutConfig.millis) {
             setTimeout(() => maybeTimingOut(numWarnings + 1), warningPeriod);
           }
@@ -164,7 +166,7 @@ export function reasonableTime(appOrParcel, lifecycle) { // app, 'unload'
   });
 }
 
-export function ensureValidAppTimeouts(timeouts) {
+export function ensureValidAppTimeouts (timeouts) {
   const result = {};
 
   for (let key in globalTimeoutConfig) {

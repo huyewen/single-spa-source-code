@@ -11,7 +11,7 @@ import { LOAD_ERROR } from "single-spa";
 
 const appsToUnload = {};
 
-export function toUnloadPromise(app) {
+export function toUnloadPromise (app) {
   console.log(999, app);
   return Promise.resolve().then(() => {
     // 在销毁映射表中没找到应用名字，说明没有要销毁的
@@ -31,13 +31,14 @@ export function toUnloadPromise(app) {
     if (app.status !== NOT_MOUNTED && app.status !== LOAD_ERROR) {
       return app;
     }
-
+    // 在合理的时间执行卸载任务
     const unloadPromise = app.status === LOAD_ERROR ? Promise.resolve() : reasonableTime(app, "unload");
     // 更新状态
     app.status = UNLOADING;
 
     return unloadPromise
       .then(() => {
+        // 复原app到最初NOT＿LOADED状态，删掉后面新加的一些属性，修改app状态
         finishUnloadingApp(app, unloadInfo);
         return app;
       })
@@ -49,7 +50,7 @@ export function toUnloadPromise(app) {
 }
 
 // 销毁应用
-function finishUnloadingApp(app, unloadInfo) {
+function finishUnloadingApp (app, unloadInfo) {
   delete appsToUnload[toName(app)];
 
   // 销毁生命周期
@@ -64,7 +65,7 @@ function finishUnloadingApp(app, unloadInfo) {
   unloadInfo.resolve();
 }
 // 销毁应用出错
-function errorUnloadingApp(app, unloadInfo, err) {
+function errorUnloadingApp (app, unloadInfo, err) {
   delete appsToUnload[toName(app)];
   // 销毁生命周期
   delete app.bootstrap;
@@ -78,7 +79,7 @@ function errorUnloadingApp(app, unloadInfo, err) {
   unloadInfo.reject(err);
 }
 // 把待销毁app保存到 appsToUnload 映射表中
-export function addAppToUnload(app, promiseGetter, resolve, reject) {
+export function addAppToUnload (app, promiseGetter, resolve, reject) {
   appsToUnload[toName(app)] = { app, resolve, reject };
   // 调用 app1.promise => promiseGetter
   Object.defineProperty(appsToUnload[toName(app)], "promise", {
@@ -87,6 +88,6 @@ export function addAppToUnload(app, promiseGetter, resolve, reject) {
 }
 
 // 待销毁app的销毁信息
-export function getAppUnloadInfo(appName) {
+export function getAppUnloadInfo (appName) {
   return appsToUnload[appName];
 }
